@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มฝากซักผ้า</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .row input[type="number"] {
+            width: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #result {
+            margin-top: 20px;
+            white-space: pre-line;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>ฟอร์มฝากซักผ้า</h1>
+
+<form id="laundryForm">
+
+    <div class="section">
+        <h3>ข้อมูลลูกค้า</h3>
+
+        <label>
+            ชื่อลูกค้า
+            <input type="text" id="customerName" required>
+        </label>
+
+        <label>
+            เบอร์ติดต่อ
+            <input type="tel" id="phoneNumber" required>
+        </label>
+    </div>
+
+    <div class="section">
+        <h3>บริการซัก</h3>
+
+        <div class="row">
+            <label>
+                <input type="checkbox" id="wash10">
+                ซัก 10 KG
+            </label>
+
+            จำนวน
+            <input type="number" id="wash10Qty" min="0" value="0">
+        </div>
+
+        <div class="row">
+            <label>
+                <input type="checkbox" id="wash13">
+                ซัก 13 KG
+            </label>
+
+            จำนวน
+            <input type="number" id="wash13Qty" min="0" value="0">
+        </div>
+
+        <div class="row">
+            <label>
+                <input type="checkbox" id="wash17">
+                ซัก 17 KG
+            </label>
+
+            จำนวน
+            <input type="number" id="wash17Qty" min="0" value="0">
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>บริการอบ</h3>
+
+        <div class="row">
+            <label>
+                <input type="checkbox" id="dry">
+                อบผ้า
+            </label>
+
+            จำนวน
+            <input type="number" id="dryQty" min="0" value="0">
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>ตัวเลือกเพิ่มเติม</h3>
+
+        <label>
+            <input type="checkbox" id="fold">
+            พับผ้า
+        </label>
+
+        <label>
+            <input type="checkbox" id="detergent">
+            ใช้น้ำยาซักผ้า
+        </label>
+
+        <label>
+            <input type="checkbox" id="softener">
+            ใช้น้ำยาปรับผ้านุ่ม
+        </label>
+    </div>
+
+    <button type="submit">ส่งข้อมูล</button>
+
+</form>
+
+<div id="result"></div>
+
+<script>
+document.getElementById('laundryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const summary = `
+ชื่อลูกค้า: ${document.getElementById('customerName').value}
+เบอร์ติดต่อ: ${document.getElementById('phoneNumber').value}
+
+รายการซัก:
+- 10 KG : ${document.getElementById('wash10').checked ? document.getElementById('wash10Qty').value : 0}
+- 13 KG : ${document.getElementById('wash13').checked ? document.getElementById('wash13Qty').value : 0}
+- 17 KG : ${document.getElementById('wash17').checked ? document.getElementById('wash17Qty').value : 0}
+
+รายการอบ:
+- อบผ้า : ${document.getElementById('dry').checked ? document.getElementById('dryQty').value : 0}
+
+พับผ้า: ${document.getElementById('fold').checked ? 'ใช่' : 'ไม่'}
+น้ำยาซักผ้า: ${document.getElementById('detergent').checked ? 'มี' : 'ไม่มี'}
+น้ำยาปรับผ้านุ่ม: ${document.getElementById('softener').checked ? 'มี' : 'ไม่มี'}
+`;
+
+    document.getElementById('result').innerText = summary;
+});
+</script>
+
+</body>
+</html>
