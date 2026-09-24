@@ -3,184 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ฟอร์มฝากซักผ้า</title>
+
+    <title>ระบบฝากซัก อบ พับ</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 700px;
-            margin: 20px auto;
-            padding: 20px;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 40px 20px;
         }
 
-        h1 {
+        .container {
+            max-width: 420px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             text-align: center;
         }
 
-        .section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+        h1 {
+            margin-bottom: 10px;
         }
 
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-
-        input[type="text"],
-        input[type="tel"],
-        input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
-
-        .row {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .row input[type="number"] {
-            width: 100px;
+        p {
+            color: #666;
         }
 
         button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #06c755;
+            color: white;
             font-size: 16px;
             cursor: pointer;
+            margin-top: 20px;
         }
 
-        #result {
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #userInfo {
             margin-top: 20px;
-            white-space: pre-line;
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
+            text-align: left;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
+
 <body>
 
-<h1>ฟอร์มฝากซักผ้า</h1>
+<div class="container">
 
-<form id="laundryForm">
+    <h1>ฝากซัก อบ พับ</h1>
 
-    <div class="section">
-        <h3>ข้อมูลลูกค้า</h3>
+    <p id="status">
+        กรุณาเข้าสู่ระบบ
+    </p>
 
-        <label>
-            ชื่อลูกค้า
-            <input type="text" id="customerName" required>
-        </label>
+    <button id="loginButton">
+        เข้าสู่ระบบด้วย LINE
+    </button>
 
-        <label>
-            เบอร์ติดต่อ
-            <input type="tel" id="phoneNumber" required>
-        </label>
+    <div id="userInfo" class="hidden">
+        <hr>
+
+        <p>
+            <strong>เข้าสู่ระบบแล้ว</strong>
+        </p>
+
+        <p>
+            User ID:
+            <br>
+            <span id="userId"></span>
+        </p>
+
+        <p>
+            ชื่อ:
+            <br>
+            <span id="userName"></span>
+        </p>
+
+        <button id="logoutButton">
+            ออกจากระบบ
+        </button>
     </div>
 
-    <div class="section">
-        <h3>บริการซัก</h3>
-
-        <div class="row">
-            <label>
-                <input type="checkbox" id="wash10">
-                ซัก 10 KG
-            </label>
-
-            จำนวน
-            <input type="number" id="wash10Qty" min="0" value="0">
-        </div>
-
-        <div class="row">
-            <label>
-                <input type="checkbox" id="wash13">
-                ซัก 13 KG
-            </label>
-
-            จำนวน
-            <input type="number" id="wash13Qty" min="0" value="0">
-        </div>
-
-        <div class="row">
-            <label>
-                <input type="checkbox" id="wash17">
-                ซัก 17 KG
-            </label>
-
-            จำนวน
-            <input type="number" id="wash17Qty" min="0" value="0">
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>บริการอบ</h3>
-
-        <div class="row">
-            <label>
-                <input type="checkbox" id="dry">
-                อบผ้า
-            </label>
-
-            จำนวน
-            <input type="number" id="dryQty" min="0" value="0">
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>ตัวเลือกเพิ่มเติม</h3>
-
-        <label>
-            <input type="checkbox" id="fold">
-            พับผ้า
-        </label>
-
-        <label>
-            <input type="checkbox" id="detergent">
-            ใช้น้ำยาซักผ้า
-        </label>
-
-        <label>
-            <input type="checkbox" id="softener">
-            ใช้น้ำยาปรับผ้านุ่ม
-        </label>
-    </div>
-
-    <button type="submit">ส่งข้อมูล</button>
-
-</form>
-
-<div id="result"></div>
+</div>
 
 <script>
-document.getElementById('laundryForm').addEventListener('submit', function(e) {
-    e.preventDefault();
 
-    const summary = `
-ชื่อลูกค้า: ${document.getElementById('customerName').value}
-เบอร์ติดต่อ: ${document.getElementById('phoneNumber').value}
+    // ========================================
+    // Supabase Configuration
+    // ========================================
 
-รายการซัก:
-- 10 KG : ${document.getElementById('wash10').checked ? document.getElementById('wash10Qty').value : 0}
-- 13 KG : ${document.getElementById('wash13').checked ? document.getElementById('wash13Qty').value : 0}
-- 17 KG : ${document.getElementById('wash17').checked ? document.getElementById('wash17Qty').value : 0}
+    const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
 
-รายการอบ:
-- อบผ้า : ${document.getElementById('dry').checked ? document.getElementById('dryQty').value : 0}
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-พับผ้า: ${document.getElementById('fold').checked ? 'ใช่' : 'ไม่'}
-น้ำยาซักผ้า: ${document.getElementById('detergent').checked ? 'มี' : 'ไม่มี'}
-น้ำยาปรับผ้านุ่ม: ${document.getElementById('softener').checked ? 'มี' : 'ไม่มี'}
-`;
 
-    document.getElementById('result').innerText = summary;
-});
+    const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+
+
+    // ========================================
+    // Login
+    // ========================================
+
+    document
+        .getElementById('loginButton')
+        .addEventListener('click', async () => {
+
+            const { data, error } =
+                await supabaseClient.auth.signInWithOAuth({
+                    provider: 'custom:line',
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+
+            if (error) {
+                console.error(error);
+
+                alert(
+                    'ไม่สามารถเข้าสู่ระบบได้\n' +
+                    error.message
+                );
+            }
+        });
+
+
+    // ========================================
+    // ตรวจสอบ Session
+    // ========================================
+
+    async function checkUser() {
+
+        const {
+            data: {
+                session
+            }
+        } = await supabaseClient.auth.getSession();
+
+
+        if (session) {
+
+            const user = session.user;
+
+            document
+                .getElementById('status')
+                .innerText = 'เข้าสู่ระบบเรียบร้อยแล้ว';
+
+            document
+                .getElementById('loginButton')
+                .classList.add('hidden');
+
+            document
+                .getElementById('userInfo')
+                .classList.remove('hidden');
+
+
+            document
+                .getElementById('userId')
+                .innerText = user.id;
+
+
+            document
+                .getElementById('userName')
+                .innerText =
+                    user.user_metadata?.name ||
+                    user.user_metadata?.display_name ||
+                    '-';
+
+        }
+    }
+
+
+    // ========================================
+    // Logout
+    // ========================================
+
+    document
+        .getElementById('logoutButton')
+        .addEventListener('click', async () => {
+
+            await supabaseClient.auth.signOut();
+
+            window.location.reload();
+
+        });
+
+
+    // ========================================
+    // Auth State Change
+    // ========================================
+
+    supabaseClient.auth.onAuthStateChange(
+        (event, session) => {
+
+            console.log(
+                'Auth Event:',
+                event,
+                session
+            );
+
+            if (session) {
+                checkUser();
+            }
+
+        }
+    );
+
+
+    // เริ่มตรวจสอบ
+    checkUser();
+
 </script>
 
 </body>
